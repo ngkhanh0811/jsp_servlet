@@ -8,8 +8,10 @@ ProjectName: reflection*/
 
 import java.sql.ResultSet;
 import java.util.List;
+import java.util.Optional;
 
 public interface JpaExecuter<T> {
     List<T> findall();
     List<T> entityParser(ResultSet rs);
+    T getItemById(String id);
 }

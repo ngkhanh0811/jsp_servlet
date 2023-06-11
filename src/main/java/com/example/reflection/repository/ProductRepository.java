@@ -14,4 +14,6 @@ public interface ProductRepository {
     Object getAll();
 
     List<Product> findall();
+
+    Product getById(String id);
 }

@@ -40,7 +40,8 @@ public enum SqlStatementEnum {
     LESS_THAN( "<"),
     GREATER_THAN_OR_EQUAL_TO( ">="),
     LESS_THAN_OR_EQUAL_TO( "<="),
-    NOT_EQUAL_TO ("!=");
+    NOT_EQUAL_TO ("!="),
+    QUEST("?");
 
     public String value ;
     private SqlStatementEnum(String value) {

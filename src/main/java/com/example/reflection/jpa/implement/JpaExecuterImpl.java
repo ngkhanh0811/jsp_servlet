@@ -8,6 +8,7 @@ ProjectName: reflection*/
 
 import com.example.reflection.annotation.Column;
 import com.example.reflection.annotation.Entity;
+import com.example.reflection.annotation.Id;
 import com.example.reflection.config.DBConnection;
 import com.example.reflection.constant.SqlStatementEnum;
 import com.example.reflection.jpa.JpaExecuter;
@@ -20,7 +21,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class JpaExecuterImpl<T> implements JpaExecuter<T> {
     private Class<T> clazz;
@@ -103,5 +106,47 @@ public class JpaExecuterImpl<T> implements JpaExecuter<T> {
         }
 
         return entitys;
+    }
+
+    @Override
+    public T getItemById(String id) {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getInstance().getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        if(conn == null) {
+            // todo: log
+            System.err.println("Connection is null" + conn);
+        } else {
+            System.err.println(conn);
+        }
+        String idColumn = null;
+        // get column name of id
+        for(Field f : clazz.getDeclaredFields()){
+            if (f.isAnnotationPresent(Id.class)){
+                // id is existed
+//                idColumn = f.getAnnotation(Id.class).name();
+
+                idColumn = (StringUtils.isEmpty(f.getAnnotation(Id.class).name())) ? f.getName() : f.getAnnotation(Id.class).name().trim();
+            }
+        }
+        StringBuilder statement = new StringBuilder().append(SqlStatementEnum.SELECT_ASTERISK.value)
+                .append(SqlStatementEnum.SPACE.value).append(SqlStatementEnum.FROM).append(SqlStatementEnum.SPACE.value).append(tableName).append(SqlStatementEnum.SPACE.value).append(SqlStatementEnum.WHERE).append(SqlStatementEnum.SPACE.value).append(idColumn).append(SqlStatementEnum.SPACE.value).append(SqlStatementEnum.EQUAL).append(SqlStatementEnum.QUEST);
+    try {
+        PreparedStatement preparedStatement = conn.prepareStatement(statement.toString());
+        preparedStatement.setString(1, id);
+        ResultSet rs = preparedStatement.executeQuery();
+        List<T> results = entityParser(rs);
+        if (!Object.isNull(results) && results.size() > 0){
+            return results.get(0);
+        }
+    }
+     catch (SQLException e) {
+        throw new RuntimeException();
+    }
+        return null;
     }
 }
